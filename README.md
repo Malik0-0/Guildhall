@@ -15,7 +15,6 @@
     <a href="#-key-features">Features</a> •
     <a href="#-business-model">Business Model</a> •
     <a href="#-technology-stack">Technology</a> •
-    <a href="#-demo">Demo</a> •
     <a href="#-getting-started">Getting Started</a>
   </p>
 </div>
