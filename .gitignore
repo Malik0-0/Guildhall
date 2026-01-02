@@ -22,3 +22,99 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Laravel specific
+/app/Models/PhpDoc
+/bootstrap/cache
+/config/app.php
+/database/database.sqlite
+/database/*.sqlite*
+/storage/app/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+/storage/tmp/*
+/public/storage
+/public/hot
+/public/build
+
+# Environment and configuration
+.env.local
+.env.*.local
+config/app.php
+config/database.php
+
+# IDE and editor files
+*.swp
+*.swo
+*~
+.vscode/settings.json
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/shelf
+.idea/contentModel.xml
+.idea/dataSources.ids
+.idea/dataSources.local.xml
+.idea/sqlDataSources.xml
+.idea/dynamic.xml
+.idea/uiDesigner.xml
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Build outputs
+/public/build
+/public/hot
+/public/storage
+/storage/app/public/*
+/storage/logs/*.log
+
+# Testing
+.phpunit.result.cache
+.phpunit.cache
+/Homestead.json
+/Homestead.yaml
+/npm-debug.log
+/yarn-error.log
+
+# Cache and temporary files
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+/storage/tmp/*
+/bootstrap/cache/config.php
+/bootstrap/cache/routes.php
+/bootstrap/cache/events.php
+/bootstrap/cache/metadata.php
+/bootstrap/cache/packages.php
+/bootstrap/cache/services.php
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Markdown files except README
+*.md
+!README.md
+!CONTRIBUTING.md
+!LICENSE.md
