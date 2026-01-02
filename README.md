@@ -320,10 +320,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-- **Project Lead**: [Your Name]
-- **Email**: [your.email@example.com]
-- **Website**: [https://your-website.com]
-- **Documentation**: [https://docs.guildhall.com]
+- **Project Lead**: Malik Alrasyid Basori
+- **Email**: malikalrasyidbasori.1@gmail.com
 
 ---
 
