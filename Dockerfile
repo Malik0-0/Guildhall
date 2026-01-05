@@ -101,8 +101,8 @@ RUN rm -rf bootstrap/cache/*.php
 # Generate optimized autoloader (skip scripts to avoid Laravel initialization during build)
 RUN composer dump-autoload --optimize --classmap-authoritative --no-dev --no-scripts
 
-# Expose ports
-EXPOSE 80 8080
+# Expose ports (Railway will route to port 80)
+EXPOSE 80
 
 # Health check (optional - can be removed if not needed)
 # HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
@@ -110,12 +110,8 @@ EXPOSE 80 8080
 
 # Create startup script to handle initialization
 RUN echo '#!/bin/sh' > /usr/local/bin/start.sh && \
-    echo '# Export PORT for Nginx (Railway provides this)' >> /usr/local/bin/start.sh && \
-    echo 'export PORT=${PORT:-80}' >> /usr/local/bin/start.sh && \
     echo '# Clear caches to remove dev dependencies (before Laravel loads)' >> /usr/local/bin/start.sh && \
     echo 'rm -f bootstrap/cache/packages.php bootstrap/cache/services.php 2>/dev/null || true' >> /usr/local/bin/start.sh && \
-    echo '# Replace PORT in nginx config' >> /usr/local/bin/start.sh && \
-    echo 'sed -i "s/listen \${PORT:-80};/listen ${PORT:-80};/" /etc/nginx/http.d/default.conf || true' >> /usr/local/bin/start.sh && \
     echo '# Start supervisor (PHP-FPM and Nginx will start first)' >> /usr/local/bin/start.sh && \
     echo 'exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf' >> /usr/local/bin/start.sh && \
     chmod +x /usr/local/bin/start.sh
