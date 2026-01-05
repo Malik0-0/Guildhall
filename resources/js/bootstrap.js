@@ -8,16 +8,25 @@ import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
 
-// Only initialize Echo if Reverb app key is available
-const reverbAppKey = import.meta.env.VITE_REVERB_APP_KEY;
+// Get Reverb config from Vite env (build time) or meta tags (runtime)
+const getMetaContent = (name) => {
+    const meta = document.querySelector(`meta[name="${name}"]`);
+    return meta ? meta.getAttribute('content') : null;
+};
+
+const reverbAppKey = import.meta.env.VITE_REVERB_APP_KEY || getMetaContent('reverb-app-key');
+const reverbHost = import.meta.env.VITE_REVERB_HOST || getMetaContent('reverb-host') || window.location.hostname;
+const reverbPort = import.meta.env.VITE_REVERB_PORT || getMetaContent('reverb-port') || '443';
+const reverbScheme = import.meta.env.VITE_REVERB_SCHEME || getMetaContent('reverb-scheme') || 'https';
+
 if (reverbAppKey) {
     window.Echo = new Echo({
         broadcaster: 'reverb',
         key: reverbAppKey,
-        wsHost: import.meta.env.VITE_REVERB_HOST || window.location.hostname,
-        wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
-        wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
-        forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+        wsHost: reverbHost,
+        wsPort: reverbScheme === 'https' ? 443 : 80,
+        wssPort: 443,
+        forceTLS: reverbScheme === 'https',
         enabledTransports: ['ws', 'wss'],
         authEndpoint: '/broadcasting/auth',
         auth: {
