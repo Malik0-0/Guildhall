@@ -92,8 +92,12 @@ RUN mkdir -p storage/framework/{sessions,views,cache} \
     storage/logs \
     bootstrap/cache \
     /tmp \
+    /var/lib/nginx/tmp \
+    /var/log/nginx \
     && chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache \
+    && chown -R www-data:www-data /var/lib/nginx /var/log/nginx \
+    && chmod -R 755 /var/lib/nginx /var/log/nginx
 
 # Clear all bootstrap cache files (removes dev-only packages like Pail)
 RUN rm -rf bootstrap/cache/*.php
@@ -111,11 +115,8 @@ EXPOSE 80
 
 # Create startup script to handle initialization  
 RUN echo '#!/bin/sh' > /usr/local/bin/start.sh && \
-    echo 'set -e' >> /usr/local/bin/start.sh && \
     echo '# Clear caches to remove dev dependencies (before Laravel loads)' >> /usr/local/bin/start.sh && \
-    echo 'rm -f bootstrap/cache/packages.php bootstrap/cache/services.php 2>/dev/null || true' >> /usr/local/bin/start.sh && \
-    echo '# Wait a moment for services to initialize' >> /usr/local/bin/start.sh && \
-    echo 'sleep 2' >> /usr/local/bin/start.sh && \
+    echo 'rm -rf bootstrap/cache/*.php 2>/dev/null || true' >> /usr/local/bin/start.sh && \
     echo '# Start supervisor (PHP-FPM and Nginx will start first)' >> /usr/local/bin/start.sh && \
     echo 'exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf' >> /usr/local/bin/start.sh && \
     chmod +x /usr/local/bin/start.sh
