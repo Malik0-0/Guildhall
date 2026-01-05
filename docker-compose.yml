@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: guildhall-app
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+      - "8080:8080"
+    environment:
+      - APP_NAME=${APP_NAME:-Guildhall}
+      - APP_ENV=${APP_ENV:-production}
+      - APP_KEY=${APP_KEY}
+      - APP_DEBUG=${APP_DEBUG:-false}
+      - APP_URL=${APP_URL:-http://localhost:8000}
+      - DB_CONNECTION=${DB_CONNECTION:-mysql}
+      - DB_HOST=${DB_HOST:-db}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_DATABASE=${DB_DATABASE:-guildhall}
+      - DB_USERNAME=${DB_USERNAME:-guildhall}
+      - DB_PASSWORD=${DB_PASSWORD:-guildhall}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - QUEUE_CONNECTION=${QUEUE_CONNECTION:-redis}
+      - CACHE_DRIVER=${CACHE_DRIVER:-redis}
+      - SESSION_DRIVER=${SESSION_DRIVER:-redis}
+      - MIDTRANS_MERCHANT_ID=${MIDTRANS_MERCHANT_ID}
+      - MIDTRANS_SERVER_KEY=${MIDTRANS_SERVER_KEY}
+      - MIDTRANS_CLIENT_KEY=${MIDTRANS_CLIENT_KEY}
+      - MIDTRANS_IS_PRODUCTION=${MIDTRANS_IS_PRODUCTION:-false}
+      - REVERB_APP_ID=${REVERB_APP_ID:-guildhall}
+      - REVERB_APP_KEY=${REVERB_APP_KEY}
+      - REVERB_APP_SECRET=${REVERB_APP_SECRET}
+      - REVERB_HOST=${REVERB_HOST:-localhost}
+      - REVERB_PORT=${REVERB_PORT:-8080}
+      - REVERB_SCHEME=${REVERB_SCHEME:-http}
+      - VITE_REVERB_APP_KEY=${VITE_REVERB_APP_KEY}
+      - VITE_REVERB_HOST=${VITE_REVERB_HOST:-localhost}
+      - VITE_REVERB_PORT=${VITE_REVERB_PORT:-8080}
+      - VITE_REVERB_SCHEME=${VITE_REVERB_SCHEME:-http}
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    depends_on:
+      - db
+      - redis
+    networks:
+      - guildhall-network
+
+  db:
+    image: mysql:8.0
+    container_name: guildhall-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE:-guildhall}
+      - MYSQL_USER=${DB_USERNAME:-guildhall}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-guildhall}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootpassword}
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - guildhall-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: guildhall-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - guildhall-network
+
+volumes:
+  db_data:
+  redis_data:
+
+networks:
+  guildhall-network:
+    driver: bridge
+

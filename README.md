@@ -187,7 +187,12 @@ npm run build
 
 # Start server
 php artisan serve
+
+# Start WebSocket server (Laravel Reverb) - Required for real-time features
+php artisan reverb:start
 ```
+
+**Note:** For real-time features (messaging, notifications), you need to run the Reverb WebSocket server in a separate terminal. The `composer run dev` command starts all services including Reverb automatically.
 
 ### Environment Configuration
 
@@ -203,11 +208,31 @@ DB_CONNECTION=sqlite
 # DB_HOST=127.0.0.1
 # DB_DATABASE=guildhall
 
+# Laravel Reverb (WebSocket) - Required for real-time features
+REVERB_APP_ID=guildhall
+REVERB_APP_KEY=your_reverb_app_key
+REVERB_APP_SECRET=your_reverb_app_secret
+REVERB_HOST=localhost
+REVERB_PORT=8080
+REVERB_SCHEME=http
+
+# Frontend Reverb Configuration (for Vite)
+VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
+VITE_REVERB_HOST="${REVERB_HOST}"
+VITE_REVERB_PORT="${REVERB_PORT}"
+VITE_REVERB_SCHEME="${REVERB_SCHEME}"
+
 # Midtrans Payments
 MIDTRANS_MERCHANT_ID=your_merchant_id
 MIDTRANS_SERVER_KEY=your_server_key
 MIDTRANS_CLIENT_KEY=your_client_key
 MIDTRANS_IS_PRODUCTION=false
+```
+
+**Generating Reverb Keys:**
+```bash
+# Generate Reverb app key and secret
+php artisan reverb:install
 ```
 
 ---
@@ -305,8 +330,14 @@ composer run test
 # Code formatting
 ./vendor/bin/pint
 
-# Start all services
+# Start all services (includes: server, queue, logs, vite, and reverb)
 composer run dev
+
+# Start services individually (if needed)
+php artisan serve              # Laravel development server
+php artisan queue:listen        # Queue worker
+php artisan reverb:start       # WebSocket server (required for real-time features)
+npm run dev                     # Vite development server
 ```
 
 ---
