@@ -15,7 +15,7 @@ COPY vite.config.js ./
 COPY resources ./resources
 COPY public ./public
 
-# Build assets
+# Build assets for production
 RUN npm run build
 
 # Stage 2: PHP dependencies stage
@@ -84,7 +84,8 @@ COPY --from=composer-stage --chown=www-data:www-data /app/vendor ./vendor
 # Copy application files (excluding vendor and node_modules which are in .dockerignore)
 COPY --chown=www-data:www-data . .
 
-# Copy built assets from node-builder
+# Copy built assets from node-builder (ensure directory exists first)
+RUN mkdir -p /var/www/html/public/build
 COPY --from=node-builder --chown=www-data:www-data /app/public/build ./public/build
 
 # Create necessary directories and set permissions
