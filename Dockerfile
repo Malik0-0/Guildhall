@@ -150,6 +150,9 @@ RUN echo '#!/bin/sh' > /usr/local/bin/start.sh && \
     echo '  echo "Running database migrations..."' >> /usr/local/bin/start.sh && \
     echo '  php artisan migrate --force --no-interaction 2>/dev/null || echo "Migration failed or already up to date"' >> /usr/local/bin/start.sh && \
     echo 'fi' >> /usr/local/bin/start.sh && \
+    echo '# Fix storage permissions (ensure www-data can write)' >> /usr/local/bin/start.sh && \
+    echo 'chown -R www-data:www-data /var/www/html/storage 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo 'chmod -R 775 /var/www/html/storage 2>/dev/null || true' >> /usr/local/bin/start.sh && \
     echo '# Create storage link if it does not exist' >> /usr/local/bin/start.sh && \
     echo 'if [ ! -L /var/www/html/public/storage ]; then' >> /usr/local/bin/start.sh && \
     echo '  php artisan storage:link 2>/dev/null || true' >> /usr/local/bin/start.sh && \
