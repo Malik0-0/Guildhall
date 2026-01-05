@@ -91,6 +91,7 @@ COPY --from=node-builder --chown=www-data:www-data /app/public/build ./public/bu
 RUN mkdir -p storage/framework/{sessions,views,cache} \
     storage/logs \
     bootstrap/cache \
+    /tmp \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
