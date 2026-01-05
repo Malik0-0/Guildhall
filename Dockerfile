@@ -110,12 +110,9 @@ EXPOSE 80 8080
 
 # Create startup script to handle initialization
 RUN echo '#!/bin/sh' > /usr/local/bin/start.sh && \
-    echo 'set -e' >> /usr/local/bin/start.sh && \
-    echo '# Wait for services to be ready' >> /usr/local/bin/start.sh && \
-    echo 'sleep 2' >> /usr/local/bin/start.sh && \
-    echo '# Clear caches to remove dev dependencies' >> /usr/local/bin/start.sh && \
-    echo 'rm -f bootstrap/cache/packages.php bootstrap/cache/services.php || true' >> /usr/local/bin/start.sh && \
-    echo '# Start supervisor' >> /usr/local/bin/start.sh && \
+    echo '# Clear caches to remove dev dependencies (before Laravel loads)' >> /usr/local/bin/start.sh && \
+    echo 'rm -f bootstrap/cache/packages.php bootstrap/cache/services.php 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo '# Start supervisor (PHP-FPM and Nginx will start first)' >> /usr/local/bin/start.sh && \
     echo 'exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf' >> /usr/local/bin/start.sh && \
     chmod +x /usr/local/bin/start.sh
 
