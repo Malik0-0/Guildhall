@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="reverb-app-key" content="{{ config('reverb.apps.apps.0.key', env('REVERB_APP_KEY', '')) }}">
-    <meta name="reverb-host" content="{{ config('reverb.apps.apps.0.options.host', env('REVERB_HOST', '')) }}">
-    <meta name="reverb-port" content="{{ config('reverb.apps.apps.0.options.port', env('REVERB_PORT', '443')) }}">
-    <meta name="reverb-scheme" content="{{ config('reverb.apps.apps.0.options.scheme', env('REVERB_SCHEME', 'https')) }}">
+    <meta name="reverb-app-key" content="{{ env('REVERB_APP_KEY', config('reverb.apps.apps.0.key', '')) }}">
+    <meta name="reverb-host" content="{{ env('VITE_REVERB_HOST', env('REVERB_HOST', parse_url(config('app.url'), PHP_URL_HOST))) }}">
+    <meta name="reverb-port" content="{{ env('VITE_REVERB_PORT', env('REVERB_PORT', '443')) }}">
+    <meta name="reverb-scheme" content="{{ env('VITE_REVERB_SCHEME', env('REVERB_SCHEME', 'https')) }}">
     <title>{{ config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
