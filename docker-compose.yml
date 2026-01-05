@@ -59,8 +59,10 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootpassword}
     volumes:
       - db_data:/var/lib/mysql
-    ports:
-      - "3307:3306"  # Changed to 3307 to avoid conflict with local MySQL
+    # Port mapping removed - app connects via Docker network (service name 'db')
+    # Uncomment below if you need external MySQL access (e.g., from MySQL Workbench)
+    # ports:
+    #   - "3307:3306"
     networks:
       - guildhall-network
 
