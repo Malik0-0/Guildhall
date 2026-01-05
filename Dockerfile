@@ -91,11 +91,12 @@ COPY --from=node-builder --chown=www-data:www-data /app/public/build ./public/bu
 RUN mkdir -p storage/framework/{sessions,views,cache} \
     storage/logs \
     bootstrap/cache \
+    database \
     /tmp \
     /var/lib/nginx/tmp \
     /var/log/nginx \
-    && chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache database \
+    && chmod -R 775 storage bootstrap/cache database \
     && chown -R www-data:www-data /var/lib/nginx /var/log/nginx \
     && chmod -R 755 /var/lib/nginx /var/log/nginx
 
@@ -117,6 +118,38 @@ EXPOSE 80
 RUN echo '#!/bin/sh' > /usr/local/bin/start.sh && \
     echo '# Clear caches to remove dev dependencies (before Laravel loads)' >> /usr/local/bin/start.sh && \
     echo 'rm -rf bootstrap/cache/*.php 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo '# Generate APP_KEY if not set (required for Laravel)' >> /usr/local/bin/start.sh && \
+    echo 'cd /var/www/html' >> /usr/local/bin/start.sh && \
+    echo 'if [ -z "$APP_KEY" ] || ! grep -q "^APP_KEY=" .env 2>/dev/null; then' >> /usr/local/bin/start.sh && \
+    echo '  if [ ! -f .env ]; then' >> /usr/local/bin/start.sh && \
+    echo '    touch .env' >> /usr/local/bin/start.sh && \
+    echo '  fi' >> /usr/local/bin/start.sh && \
+    echo '  if ! grep -q "^APP_KEY=" .env 2>/dev/null; then' >> /usr/local/bin/start.sh && \
+    echo '    echo "Warning: APP_KEY not set, generating a new one..."' >> /usr/local/bin/start.sh && \
+    echo '    php artisan key:generate --force 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo '    echo "Note: Set APP_KEY as environment variable in Railway for production!"' >> /usr/local/bin/start.sh && \
+    echo '  fi' >> /usr/local/bin/start.sh && \
+    echo 'fi' >> /usr/local/bin/start.sh && \
+    echo '# Ensure database directory exists and has proper permissions' >> /usr/local/bin/start.sh && \
+    echo 'mkdir -p /var/www/html/database' >> /usr/local/bin/start.sh && \
+    echo 'chown -R www-data:www-data /var/www/html/database 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo 'chmod -R 775 /var/www/html/database 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo '# Create SQLite database file if it does not exist and set permissions' >> /usr/local/bin/start.sh && \
+    echo 'if [ ! -f /var/www/html/database/database.sqlite ]; then' >> /usr/local/bin/start.sh && \
+    echo '  touch /var/www/html/database/database.sqlite 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo '  chown www-data:www-data /var/www/html/database/database.sqlite 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo '  chmod 666 /var/www/html/database/database.sqlite 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo 'fi' >> /usr/local/bin/start.sh && \
+    echo '# Always fix permissions on existing database file (in case it was copied with wrong perms)' >> /usr/local/bin/start.sh && \
+    echo 'if [ -f /var/www/html/database/database.sqlite ]; then' >> /usr/local/bin/start.sh && \
+    echo '  chown www-data:www-data /var/www/html/database/database.sqlite 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo '  chmod 666 /var/www/html/database/database.sqlite 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo 'fi' >> /usr/local/bin/start.sh && \
+    echo '# Run database migrations (only if using PostgreSQL/MySQL, skip for SQLite)' >> /usr/local/bin/start.sh && \
+    echo 'if [ "$DB_CONNECTION" != "sqlite" ]; then' >> /usr/local/bin/start.sh && \
+    echo '  echo "Running database migrations..."' >> /usr/local/bin/start.sh && \
+    echo '  php artisan migrate --force --no-interaction 2>/dev/null || echo "Migration failed or already up to date"' >> /usr/local/bin/start.sh && \
+    echo 'fi' >> /usr/local/bin/start.sh && \
     echo '# Start supervisor (PHP-FPM and Nginx will start first)' >> /usr/local/bin/start.sh && \
     echo 'exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf' >> /usr/local/bin/start.sh && \
     chmod +x /usr/local/bin/start.sh
