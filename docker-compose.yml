@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -62,7 +60,7 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"  # Changed to 3307 to avoid conflict with local MySQL
     networks:
       - guildhall-network
 
