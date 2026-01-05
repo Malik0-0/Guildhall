@@ -94,8 +94,8 @@ RUN mkdir -p storage/framework/{sessions,views,cache} \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Generate optimized autoloader (after copying app files)
-RUN composer dump-autoload --optimize --classmap-authoritative --no-dev
+# Generate optimized autoloader (skip scripts to avoid Laravel initialization during build)
+RUN composer dump-autoload --optimize --classmap-authoritative --no-dev --no-scripts
 
 # Expose ports
 EXPOSE 80 8080
