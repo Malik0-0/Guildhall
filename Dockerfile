@@ -102,16 +102,20 @@ RUN rm -rf bootstrap/cache/*.php
 RUN composer dump-autoload --optimize --classmap-authoritative --no-dev --no-scripts
 
 # Expose ports (Railway will route to port 80)
+# Note: Railway auto-detects EXPOSE, but you may need to set PORT=80 in Railway settings
 EXPOSE 80
 
 # Health check (optional - can be removed if not needed)
 # HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 #     CMD php -r "file_get_contents('http://localhost/') ? exit(0) : exit(1);" || exit 1
 
-# Create startup script to handle initialization
+# Create startup script to handle initialization  
 RUN echo '#!/bin/sh' > /usr/local/bin/start.sh && \
+    echo 'set -e' >> /usr/local/bin/start.sh && \
     echo '# Clear caches to remove dev dependencies (before Laravel loads)' >> /usr/local/bin/start.sh && \
     echo 'rm -f bootstrap/cache/packages.php bootstrap/cache/services.php 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo '# Wait a moment for services to initialize' >> /usr/local/bin/start.sh && \
+    echo 'sleep 2' >> /usr/local/bin/start.sh && \
     echo '# Start supervisor (PHP-FPM and Nginx will start first)' >> /usr/local/bin/start.sh && \
     echo 'exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf' >> /usr/local/bin/start.sh && \
     chmod +x /usr/local/bin/start.sh
