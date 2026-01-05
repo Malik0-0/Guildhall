@@ -95,6 +95,9 @@ RUN mkdir -p storage/framework/{sessions,views,cache} \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+# Clear all bootstrap cache files (removes dev-only packages like Pail)
+RUN rm -rf bootstrap/cache/*.php
+
 # Generate optimized autoloader (skip scripts to avoid Laravel initialization during build)
 RUN composer dump-autoload --optimize --classmap-authoritative --no-dev --no-scripts
 
@@ -105,6 +108,15 @@ EXPOSE 80 8080
 # HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 #     CMD php -r "file_get_contents('http://localhost/') ? exit(0) : exit(1);" || exit 1
 
+# Create startup script to handle initialization
+RUN echo '#!/bin/sh' > /usr/local/bin/start.sh && \
+    echo 'set -e' >> /usr/local/bin/start.sh && \
+    echo 'php artisan config:clear || true' >> /usr/local/bin/start.sh && \
+    echo 'php artisan cache:clear || true' >> /usr/local/bin/start.sh && \
+    echo 'php artisan view:clear || true' >> /usr/local/bin/start.sh && \
+    echo 'exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf' >> /usr/local/bin/start.sh && \
+    chmod +x /usr/local/bin/start.sh
+
 # Start supervisor (which manages PHP-FPM and Nginx)
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/usr/local/bin/start.sh"]
 
