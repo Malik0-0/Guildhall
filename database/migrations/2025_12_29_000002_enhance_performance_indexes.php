@@ -12,10 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add full-text search index for quests (if using MySQL/MariaDB)
-        // For SQLite, we'll add regular indexes
-        if (config('database.default') === 'sqlite') {
-            // SQLite doesn't support full-text search easily, so we add composite indexes
+        $connection = config('database.default');
+        
+        // Add search indexes based on database type
+        if ($connection === 'sqlite') {
+            // SQLite doesn't support full-text search easily, so we add regular indexes
+            DB::statement('CREATE INDEX IF NOT EXISTS quests_title_search_index ON quests (title)');
+            DB::statement('CREATE INDEX IF NOT EXISTS quests_description_search_index ON quests (description)');
+        } elseif ($connection === 'pgsql') {
+            // PostgreSQL: Use regular indexes (PostgreSQL has GIN indexes for full-text, but simpler for now)
             DB::statement('CREATE INDEX IF NOT EXISTS quests_title_search_index ON quests (title)');
             DB::statement('CREATE INDEX IF NOT EXISTS quests_description_search_index ON quests (description)');
         } else {
