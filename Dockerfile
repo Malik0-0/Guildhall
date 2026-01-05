@@ -16,7 +16,9 @@ COPY resources ./resources
 COPY public ./public
 
 # Build assets for production
-RUN npm run build
+RUN npm run build && \
+    ls -la /app/public/build/ && \
+    test -f /app/public/build/manifest.json && echo "✓ manifest.json created" || echo "✗ manifest.json missing"
 
 # Stage 2: PHP dependencies stage
 FROM composer:2.7 AS composer-stage
@@ -85,8 +87,12 @@ COPY --from=composer-stage --chown=www-data:www-data /app/vendor ./vendor
 COPY --chown=www-data:www-data . .
 
 # Copy built assets from node-builder (ensure directory exists first)
-RUN mkdir -p /var/www/html/public/build
+RUN mkdir -p /var/www/html/public/build && \
+    chown -R www-data:www-data /var/www/html/public/build
 COPY --from=node-builder --chown=www-data:www-data /app/public/build ./public/build
+RUN chown -R www-data:www-data /var/www/html/public/build && \
+    chmod -R 755 /var/www/html/public/build && \
+    test -f /var/www/html/public/build/manifest.json && echo "✓ manifest.json copied successfully" || echo "✗ manifest.json not found after copy"
 
 # Create necessary directories and set permissions
 RUN mkdir -p storage/framework/{sessions,views,cache} \
