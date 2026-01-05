@@ -150,6 +150,13 @@ RUN echo '#!/bin/sh' > /usr/local/bin/start.sh && \
     echo '  echo "Running database migrations..."' >> /usr/local/bin/start.sh && \
     echo '  php artisan migrate --force --no-interaction 2>/dev/null || echo "Migration failed or already up to date"' >> /usr/local/bin/start.sh && \
     echo 'fi' >> /usr/local/bin/start.sh && \
+    echo '# Create storage link if it does not exist' >> /usr/local/bin/start.sh && \
+    echo 'if [ ! -L /var/www/html/public/storage ]; then' >> /usr/local/bin/start.sh && \
+    echo '  php artisan storage:link 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo 'fi' >> /usr/local/bin/start.sh && \
+    echo '# Clear and cache config for production' >> /usr/local/bin/start.sh && \
+    echo 'php artisan config:clear 2>/dev/null || true' >> /usr/local/bin/start.sh && \
+    echo 'php artisan cache:clear 2>/dev/null || true' >> /usr/local/bin/start.sh && \
     echo '# Start supervisor (PHP-FPM and Nginx will start first)' >> /usr/local/bin/start.sh && \
     echo 'exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf' >> /usr/local/bin/start.sh && \
     chmod +x /usr/local/bin/start.sh
