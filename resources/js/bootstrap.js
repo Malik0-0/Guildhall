@@ -16,7 +16,6 @@ const getMetaContent = (name) => {
 
 const reverbAppKey = import.meta.env.VITE_REVERB_APP_KEY || getMetaContent('reverb-app-key');
 const reverbHost = import.meta.env.VITE_REVERB_HOST || getMetaContent('reverb-host') || window.location.hostname;
-const reverbPort = import.meta.env.VITE_REVERB_PORT || getMetaContent('reverb-port') || '443';
 const reverbScheme = import.meta.env.VITE_REVERB_SCHEME || getMetaContent('reverb-scheme') || 'https';
 
 if (reverbAppKey) {
@@ -34,6 +33,8 @@ if (reverbAppKey) {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
             },
         },
+        // Disable automatic path generation - use root path since Nginx proxies /app/ to Reverb
+        disableStats: true,
     });
 } else {
     // Create a dummy Echo instance to prevent errors
