@@ -55,6 +55,9 @@ RUN apk add --no-cache \
     opcache \
     && rm -rf /var/cache/apk/*
 
+# Install Composer
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+
 # Install Redis extension
 RUN apk add --no-cache pcre-dev $PHPIZE_DEPS \
     && pecl install redis \
@@ -75,14 +78,14 @@ COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
+# Copy composer dependencies first
+COPY --from=composer-stage --chown=www-data:www-data /app/vendor ./vendor
+
+# Copy application files (excluding vendor and node_modules which are in .dockerignore)
 COPY --chown=www-data:www-data . .
 
 # Copy built assets from node-builder
 COPY --from=node-builder --chown=www-data:www-data /app/public/build ./public/build
-
-# Copy composer dependencies from composer-stage
-COPY --from=composer-stage --chown=www-data:www-data /app/vendor ./vendor
 
 # Create necessary directories and set permissions
 RUN mkdir -p storage/framework/{sessions,views,cache} \
@@ -91,7 +94,7 @@ RUN mkdir -p storage/framework/{sessions,views,cache} \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Generate optimized autoloader
+# Generate optimized autoloader (after copying app files)
 RUN composer dump-autoload --optimize --classmap-authoritative --no-dev
 
 # Expose ports
